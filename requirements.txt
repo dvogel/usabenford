@@ -1,0 +1,11 @@
+# On Debian linux you need these packages:
+# liblapack-dev libatlas-dev libblas-dev libumfpack4-dev gfortran
+
+scipy
+django
+pymongo
+stream
+futures
+httplib2
+plac
+
