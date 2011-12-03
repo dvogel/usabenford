@@ -3,8 +3,7 @@ import sys
 import json
 from functools import partial
 from datetime import datetime, date
-from itertools import islice
-from futures import ThreadPoolExecutor, as_completed
+from itertools import islice, imap
 from pymongo import Connection
 
 import usaspending
@@ -63,9 +62,8 @@ def save_analyses(db, fiscal_year, agency, spending_type, analyses):
 
 def main():
     for fiscal_year in settings.FISCAL_YEARS:
-        timewarp = ThreadPoolExecutor(max_workers=3)
-        results = timewarp.map(lambda combs: apply(download_and_analyze, combs),
-                               usaspending.file_param_combs(fiscal_year))
+        results = imap(lambda combs: apply(download_and_analyze, combs),
+                       usaspending.file_param_combs(fiscal_year))
         for result in results:
             success = result[0]
             if success:

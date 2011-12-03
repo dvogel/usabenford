@@ -29,6 +29,7 @@ def download_file(filename, url, destpath):
         return DownloadFileSuccess(filename)
     else:
         http = httplib2.Http(cache=settings.CACHE_DIR)
+        print "Fetching %s" % url
         response, content = http.request(url)
         if int(response['status']) == httplib.OK:
             with file(destpath, 'w') as outf:

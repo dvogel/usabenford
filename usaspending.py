@@ -10,7 +10,7 @@ def fiscal_year_months(year):
 
 def file_info(fiscal_year, agency, spending_type):
     today = date.today()
-    fmt = '{year}_{agency}_{spending_type}_Full_{year}{month!s:0>2}{day!s:0>2}.zip'
+    fmt = '{fiscal_year}_{agency}_{spending_type}_Full_{year}{month!s:0>2}{day!s:0>2}.zip'
     filename = fmt.format(fiscal_year=fiscal_year,
                           agency=agency,
                           spending_type=spending_type,

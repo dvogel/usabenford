@@ -38,7 +38,7 @@ def analyze_records(reader, fiscal_year, datefield, fields):
 
     observations = dict(((month, dict.fromkeys(fields, []))
                          for month in fy_months))
-    digits = dict(((month, dict.fromkeys(fields, {}))
+    digits = dict(((month, dict.fromkeys(fields, []))
                    for month in fy_months))
 
     for record in reader:
@@ -49,18 +49,19 @@ def analyze_records(reader, fiscal_year, datefield, fields):
         dt = parsedate(record[datefield], settings.DATE_FORMATS)
         dt1 = date(dt.year, dt.month, 1)
         if dt1 not in fy_months:
+            print "Skipping %s because it's not in fy_months" % repr(dt1)
             continue
 
-        obs = observations[dt1]
-        digs = observations[dt1]
-
         for field in fields:
+            obs = observations[dt1][field]
+            digs = digits[dt1][field]
+
             value = record[field]
             (value, digit) = benford_filter(value)
             if value is not None:
-                obs[field].append(value)
+                obs.append(value)
             if digit is not None:
-                digs[field].append(digit)
+                digs.append(digit)
 
     results = dict(((month, dict.fromkeys(fields, {}))
                     for month in fy_months))
@@ -78,7 +79,7 @@ def analyze_records(reader, fiscal_year, datefield, fields):
             result['median'] = numpy.median(obs_array)
             result['skew'] = stats.skew(obs_array)
             result['digits'] = benford_difference(digs)
-            
+
     return results
 
 def benford_difference(digits):
