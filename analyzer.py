@@ -1,8 +1,12 @@
+import sys
 import csv
 import numpy
 from scipy import stats
 from decimal import Decimal
 from zipfile import ZipFile
+from datetime import date
+from utils import parsedate
+from django.conf import settings
 
 BENFORD = {
     '1': float(0.301),
@@ -27,32 +31,53 @@ def frequencies(values):
         counts[value] = count + 1
     return counts
 
-def analyze_records(reader, fields):
-    observations = dict.fromkeys(fields, [])
-    digits = dict.fromkeys(fields, [])
+def analyze_records(reader, fiscal_year, datefield, fields):
+    fy_months = [date(fiscal_year - (1 if month >= 10 else 0),
+                      month, 1)
+                 for month in range(1, 13)]
+
+    observations = dict(((month, dict.fromkeys(fields, []))
+                         for month in fy_months))
+    digits = dict(((month, dict.fromkeys(fields, {}))
+                   for month in fy_months))
 
     for record in reader:
+        dtstr = record[datefield]
+        if dtstr is None or dtstr.strip() == '':
+            print >>sys.stderr, "Skipping record with blank date field."
+            continue
+        dt = parsedate(record[datefield], settings.DATE_FORMATS)
+        dt1 = date(dt.year, dt.month, 1)
+        if dt1 not in fy_months:
+            continue
+
+        obs = observations[dt1]
+        digs = observations[dt1]
+
         for field in fields:
             value = record[field]
             (value, digit) = benford_filter(value)
             if value is not None:
-                observations[field].append(value)
+                obs[field].append(value)
             if digit is not None:
-                digits[field].append(digit)
+                digs[field].append(digit)
 
-    results = dict.fromkeys(fields, {})
-    for field in fields:
-        result = results[field]
-        obs = observations[field]
-        obs_array = numpy.array(obs, dtype=float)
+    results = dict(((month, dict.fromkeys(fields, {}))
+                    for month in fy_months))
+    for dt1 in results:
+        for field in fields:
+            result = results[dt1][field]
+            obs = observations[dt1][field]
+            obs_array = numpy.array(obs, dtype=float)
+            digs = digits[dt1][field]
 
-        result['field_name'] = field
-        result['value_count'] = len(obs)
-        result['value_sum'] = numpy.sum(obs_array)
-        result['mean'] = numpy.mean(obs_array)
-        result['median'] = numpy.median(obs_array)
-        result['skew'] = stats.skew(obs_array)
-        result['digits'] = benford_difference(digits[field])
+            result['field_name'] = field
+            result['value_count'] = len(obs)
+            result['value_sum'] = numpy.sum(obs_array)
+            result['mean'] = numpy.mean(obs_array)
+            result['median'] = numpy.median(obs_array)
+            result['skew'] = stats.skew(obs_array)
+            result['digits'] = benford_difference(digs)
             
     return results
 
@@ -91,7 +116,7 @@ def benford_filter(number):
     digit = str(abs(value))[0]
     return (value, digit)
 
-def analyze_file(archive_path, fields):
+def analyze_file(archive_path, fiscal_year, datefield, fields):
     with ZipFile(archive_path) as archive:
         names = archive.namelist()
         if len(names) == 0:
@@ -102,5 +127,5 @@ def analyze_file(archive_path, fields):
             # rU provides universal new-line recognition
             with archive.open(names[0], 'rU') as datafile: 
                 reader = csv.DictReader(datafile)
-                return analyze_records(reader, fields)
+                return analyze_records(reader, fiscal_year, datefield, fields)
                 

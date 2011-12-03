@@ -1,2 +1,6 @@
+deltas
+build
+.cache
+settings.py
 *.pyc
 .*.swp

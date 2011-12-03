@@ -4,7 +4,7 @@ import httplib2
 import httplib
 from django.conf import settings
 
-assert os.path.isdir(settings.DELTA_DEST_DIR)
+assert os.path.isdir(settings.DOWNLOAD_DEST_DIR)
 
 class ShutdownCmd():
     pass
