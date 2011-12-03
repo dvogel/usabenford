@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
+{% block title %}{{ agency }} &ndash; {{ block.super }}{% endblock title %}
 
 {% block body %}
-	<div>{{ agency }}</div>
+	<h1>{{ agency }}</h1>{% for d in analyses  %}
+    <section>
+    	<h1>{{ d.field_name|title }}</h1>
+    	<time>{{ d.month }}/{{ d.fiscal_year }}</time>
+    	<p>Count: {{ d.value_count }}</p>	       
+    	<p>
+    	   {{ d.spending_type }}
+    	</p>
+    </section>{% endfor %}
 {% endblock %}
