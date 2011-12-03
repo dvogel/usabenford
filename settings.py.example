@@ -1,0 +1,73 @@
+import os
+from global_settings import *
+
+DB_NAME = 'benford1'
+
+AGENCIES = [
+    'USDA',
+    'DOC',
+    'DOD',
+    'ED',
+    'DOE',
+    'HHS',
+    'DHS',
+    'HUD',
+    'DOJ',
+    'DOL',
+    'DOS',
+    'DOT',
+    'VA',
+    'DOI',
+    'TREAS',
+    'EPA',
+#    # 'GSA', No files
+    'NASA',
+    'NSF',
+    'NRC',
+#    # 'OPM', No files
+    'SBA',
+    'SSA',
+    'USAID',
+    'OTHER'
+]
+
+SPENDING_TYPES = [
+    'Grants',
+    'Contracts',
+#    'Loans',
+#    'DirectPayments',
+#    'Insurance',
+#    'Other'
+]
+
+ANALYSIS_FIELDS = {
+    'Grants': ['fed_funding_amount', 'non_fed_funding_amount', 'total_funding_amount'],
+    'Contracts': ['obligatedamount', 'baseandexercisedoptionsvalue', 
+                  'baseandalloptionsvalue', 'annualrevenue'],
+    'Loans': [],
+    'DirectPayments': [],
+    'Insurance': [],
+    'Other': []
+}
+
+ANALYSIS_DATEFIELDS = {
+    'Grants': 'obligation_action_date',
+    'Contracts': 'effectivedate',
+    'Loans': None,
+    'DirectPayments': None,
+    'Insurance': None,
+    'Other': None
+}
+
+DATE_FORMATS = [
+    '%Y-%m-%d',
+    '%Y%m%d',
+    '%m/%d/%Y'
+]
+
+FISCAL_YEARS = range(2000, 2012)
+
+DOWNLOAD_DEST_DIR = os.path.join(PROJECT_ROOT, 'downloads')
+
+CACHE_DIR = os.path.join(PROJECT_ROOT, '.cache')
+
