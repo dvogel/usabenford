@@ -44,19 +44,19 @@ ANALYSIS_FIELDS = {
     'Grants': ['fed_funding_amount', 'non_fed_funding_amount', 'total_funding_amount'],
     'Contracts': ['obligatedamount', 'baseandexercisedoptionsvalue', 
                   'baseandalloptionsvalue', 'annualrevenue'],
-    'Loans': [],
-    'DirectPayments': [],
-    'Insurance': [],
-    'Other': []
+    'Loans': ['face_loan_guran', 'orig_sub_guran'],
+    'DirectPayments': ['fed_funding_amount'],
+    'Insurance': ['fed_funding_amount', 'non_fed_funding_amount', 'total_funding_amount'],
+    'Other': ['fed_funding_amount'],
 }
 
 ANALYSIS_DATEFIELDS = {
     'Grants': 'obligation_action_date',
     'Contracts': 'effectivedate',
-    'Loans': None,
-    'DirectPayments': None,
-    'Insurance': None,
-    'Other': None
+    'Loans': 'obligation_action_date',
+    'DirectPayments': 'obligation_action_date',
+    'Insurance': 'obligation_action_date',
+    'Other': 'obligation_action_date'
 }
 
 DATE_FORMATS = [
