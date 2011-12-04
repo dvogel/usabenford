@@ -41,7 +41,7 @@ def analyze_records(reader, fiscal_year, datefield, fields):
     digits = dict(((month, dict.fromkeys(fields, []))
                    for month in fy_months))
 
-    for record in reader:
+    for (line_number, record) in enumerate(reader, 2):
         dtstr = record[datefield]
         if dtstr is None or dtstr.strip() == '':
             print >>sys.stderr, "Skipping record with blank date field."
@@ -49,7 +49,11 @@ def analyze_records(reader, fiscal_year, datefield, fields):
         dt = parsedate(record[datefield], settings.DATE_FORMATS)
         dt1 = date(dt.year, dt.month, 1)
         if dt1 not in fy_months:
-            print "Skipping %s because it's not in fy_months" % repr(dt1)
+            fy_begin = min(fy_months)
+            fy_end = max(fy_months)
+            print "Skipping %s-%s because it's not in %s-%s - %s-%s" % (dt1.year, dt1.month,
+                                                                        fy_begin.year, fy_begin.month,
+                                                                        fy_end.year, fy_end.month)
             continue
 
         for field in fields:

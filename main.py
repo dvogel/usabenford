@@ -1,6 +1,8 @@
+import _csv
 import os
 import sys
 import json
+from futures import ThreadPoolExecutor
 from functools import partial
 from datetime import datetime, date
 from itertools import islice, imap
@@ -39,12 +41,15 @@ def download_and_analyze(fiscal_year, agency, spending_type):
         if isinstance(dl_result, DownloadFileFailure):
             return (False, dl_result)
         print >>sys.stdout, "Got file %s" % filename
-        
-        analyses = analyze_file(destpath, fiscal_year, 
-                                settings.ANALYSIS_DATEFIELDS[spending_type],
-                                settings.ANALYSIS_FIELDS[spending_type])
-        save_analyses(db, fiscal_year, agency, spending_type, analyses)
-        return (True, analyses)
+       
+        try:
+            analyses = analyze_file(destpath, fiscal_year, 
+                                    settings.ANALYSIS_DATEFIELDS[spending_type],
+                                    settings.ANALYSIS_FIELDS[spending_type])
+            save_analyses(db, fiscal_year, agency, spending_type, analyses)
+            return (True, analyses)
+        except _csv.Error, e:
+            return (False, e)
 
     return (True, None)
    
@@ -61,9 +66,10 @@ def save_analyses(db, fiscal_year, agency, spending_type, analyses):
             monthly_analyses.save(analysis)
 
 def main():
+    timewarp = ThreadPoolExecutor(2)
     for fiscal_year in settings.FISCAL_YEARS:
-        results = imap(lambda combs: apply(download_and_analyze, combs),
-                       usaspending.file_param_combs(fiscal_year))
+        results = timewarp.map(lambda combs: apply(download_and_analyze, combs),
+                               usaspending.file_param_combs(fiscal_year))
         for result in results:
             success = result[0]
             if success:
